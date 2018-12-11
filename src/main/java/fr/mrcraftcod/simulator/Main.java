@@ -2,6 +2,7 @@ package fr.mrcraftcod.simulator;
 
 import fr.mrcraftcod.simulator.events.AccService;
 import fr.mrcraftcod.simulator.events.ArrClEvent;
+import fr.mrcraftcod.simulator.laws.ExponentialLaw;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -18,14 +19,16 @@ import java.util.LinkedList;
  */
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+	public static SimulationMode mode = SimulationMode.LAW_AVERAGE;
 	
 	public static void main(String[] args) throws IOException{
-		if(true){
+		if(mode == SimulationMode.REPLAY){
 			LOGGER.info("Reading DataAppels files");
 			final var replayData = loadReplayData("DataAppels.txt");
 			ArrClEvent.setReplayData(replayData.getX());
 			AccService.setReplayData(replayData.getY());
 		}
+		ArrClEvent.setLaw(new ExponentialLaw(0.175));
 		final var simulator = new Simulator();
 		simulator.start();
 		final var data = simulator.getData();
