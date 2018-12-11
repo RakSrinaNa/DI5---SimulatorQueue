@@ -18,9 +18,13 @@ import java.util.Objects;
 public class AccService extends AbstractEvent{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccService.class);
 	private static LinkedList<Double> replayData = null;
-	private StatisticLaw law = null;
+	private static StatisticLaw law = null;
 	
 	public AccService(double time){super(time);}
+	
+	public static void setLaw(StatisticLaw law){
+		AccService.law = law;
+	}
 	
 	public static void setReplayData(LinkedList<Double> replayData){
 		AccService.replayData = replayData;

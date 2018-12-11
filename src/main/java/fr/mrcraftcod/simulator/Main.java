@@ -2,6 +2,7 @@ package fr.mrcraftcod.simulator;
 
 import fr.mrcraftcod.simulator.events.AccService;
 import fr.mrcraftcod.simulator.events.ArrClEvent;
+import fr.mrcraftcod.simulator.laws.BetaLaw;
 import fr.mrcraftcod.simulator.laws.ExponentialLaw;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -20,19 +22,25 @@ import java.util.LinkedList;
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	public static SimulationMode mode = SimulationMode.LAW_AVERAGE;
+	private static final int maxRepl = 10;
 	
 	public static void main(String[] args) throws IOException{
-		if(mode == SimulationMode.REPLAY){
-			LOGGER.info("Reading DataAppels files");
-			final var replayData = loadReplayData("DataAppels.txt");
-			ArrClEvent.setReplayData(replayData.getX());
-			AccService.setReplayData(replayData.getY());
+		final var results = new HashMap<Integer, Simulator.SimulatorData>();
+		for(int i = 0; i < maxRepl; i++){
+			LOGGER.info("Starting replication {}/{}", i, maxRepl);
+			if(mode == SimulationMode.REPLAY){
+				LOGGER.info("Reading DataAppels files");
+				final var replayData = loadReplayData("DataAppels.txt");
+				ArrClEvent.setReplayData(replayData.getX());
+				AccService.setReplayData(replayData.getY());
+			}
+			ArrClEvent.setLaw(new ExponentialLaw(0.175));
+			AccService.setLaw(new BetaLaw(2.5, 6.4));
+			final var simulator = new Simulator();
+			simulator.start();
+			results.put(i, simulator.getData());
 		}
-		ArrClEvent.setLaw(new ExponentialLaw(0.175));
-		final var simulator = new Simulator();
-		simulator.start();
-		final var data = simulator.getData();
-		LOGGER.info("Final data: {}", data);
+		LOGGER.info("Final data: {}", results);
 	}
 	
 	private static Pair<LinkedList<Double>, LinkedList<Double>> loadReplayData(@SuppressWarnings("SameParameterValue") final String filename) throws IOException{
