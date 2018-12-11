@@ -2,6 +2,8 @@ package fr.mrcraftcod.simulator;
 
 import fr.mrcraftcod.simulator.events.AccService;
 import fr.mrcraftcod.simulator.events.ArrClEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,8 +17,11 @@ import java.util.LinkedList;
  * @since 2018-11-30
  */
 public class Main{
+	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+	
 	public static void main(String[] args) throws IOException{
 		if(true){
+			LOGGER.info("Reading DataAppels files");
 			final var replayData = loadReplayData("DataAppels.txt");
 			ArrClEvent.setReplayData(replayData.getX());
 			AccService.setReplayData(replayData.getY());
@@ -24,7 +29,7 @@ public class Main{
 		final var simulator = new Simulator();
 		simulator.start();
 		final var data = simulator.getData();
-		System.out.println(data);
+		LOGGER.info("Final data: {}", data);
 	}
 	
 	private static Pair<LinkedList<Double>, LinkedList<Double>> loadReplayData(@SuppressWarnings("SameParameterValue") final String filename) throws IOException{

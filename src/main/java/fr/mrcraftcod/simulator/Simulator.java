@@ -1,6 +1,8 @@
 package fr.mrcraftcod.simulator;
 
 import fr.mrcraftcod.simulator.events.StartEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -13,6 +15,8 @@ import java.util.StringJoiner;
  * @since 2018-11-30
  */
 public class Simulator{
+	private static final Logger LOGGER = LoggerFactory.getLogger(Simulator.class);
+	
 	private final SimulatorData data;
 	private double time;
 	
@@ -41,7 +45,7 @@ public class Simulator{
 		new StartEvent().execute(data);
 		Event evt;
 		while((evt = data.queue.poll()) != null){
-			System.out.println("Executing event (t=" + evt.getTime() + "): " + evt);
+			LOGGER.debug("Executing event at t={} => {}", evt.getTime(), evt);
 			majAreas(data, time, evt.getTime());
 			time = evt.getTime();
 			evt.execute(data);
