@@ -4,7 +4,7 @@ import fr.mrcraftcod.simulator.AbstractEvent;
 import fr.mrcraftcod.simulator.Client;
 import fr.mrcraftcod.simulator.Main;
 import fr.mrcraftcod.simulator.Simulator;
-import fr.mrcraftcod.simulator.laws.StatisticLaw;
+import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
@@ -19,7 +19,7 @@ import java.util.Objects;
 public class ArrClEvent extends AbstractEvent{
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArrClEvent.class);
 	private static LinkedList<Double> replayData = null;
-	private static StatisticLaw law = null;
+	private static AbstractRealDistribution law = null;
 	
 	public ArrClEvent(double time){super(time);}
 	
@@ -44,13 +44,13 @@ public class ArrClEvent extends AbstractEvent{
 				return 1;
 			case LAW:
 			case LAW_AVERAGE:
-				return law.get();
+				return law.sample();
 		}
 		LOGGER.error("Impossible enum value");
 		return 1;
 	}
 	
-	public static void setLaw(StatisticLaw law){
+	public static void setLaw(AbstractRealDistribution law){
 		ArrClEvent.law = law;
 	}
 	

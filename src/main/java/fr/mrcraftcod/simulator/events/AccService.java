@@ -3,7 +3,7 @@ package fr.mrcraftcod.simulator.events;
 import fr.mrcraftcod.simulator.AbstractEvent;
 import fr.mrcraftcod.simulator.Main;
 import fr.mrcraftcod.simulator.Simulator;
-import fr.mrcraftcod.simulator.laws.StatisticLaw;
+import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
@@ -18,12 +18,27 @@ import java.util.Objects;
 public class AccService extends AbstractEvent{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccService.class);
 	private static LinkedList<Double> replayData = null;
-	private static StatisticLaw law = null;
+	private static AbstractRealDistribution law = null;
 	
 	public AccService(double time){super(time);}
 	
-	public static void setLaw(StatisticLaw law){
-		AccService.law = law;
+	private double getServiceTime(){
+		switch(Main.mode){
+			case AVERAGE:
+			case LAW_AVERAGE:
+				return 5.156735016;
+			case REPLAY:
+				final var value = AccService.replayData.poll();
+				if(Objects.nonNull(value)){
+					return value;
+				}
+				LOGGER.error("No more data in replay");
+				return 1;
+			case LAW:
+				return (18.24 - 0.15) * law.sample() + 0.15;
+		}
+		LOGGER.error("Impossible enum value");
+		return 1;
 	}
 	
 	public static void setReplayData(LinkedList<Double> replayData){
@@ -40,22 +55,7 @@ public class AccService extends AbstractEvent{
 		}
 	}
 	
-	private double getServiceTime(){
-		switch(Main.mode){
-			case AVERAGE:
-			case LAW_AVERAGE:
-				return 5.156735016;
-			case REPLAY:
-				final var value = AccService.replayData.poll();
-				if(Objects.nonNull(value)){
-					return value;
-				}
-				LOGGER.error("No more data in replay");
-				return 1;
-			case LAW:
-				return law.get();
-		}
-		LOGGER.error("Impossible enum value");
-		return 1;
+	public static void setLaw(AbstractRealDistribution law){
+		AccService.law = law;
 	}
 }

@@ -2,8 +2,8 @@ package fr.mrcraftcod.simulator;
 
 import fr.mrcraftcod.simulator.events.AccService;
 import fr.mrcraftcod.simulator.events.ArrClEvent;
-import fr.mrcraftcod.simulator.laws.BetaLaw;
-import fr.mrcraftcod.simulator.laws.ExponentialLaw;
+import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /**
  * Created by Thomas Couchoud (MrCraftCod - zerderr@gmail.com) on 2018-11-30.
@@ -21,8 +22,8 @@ import java.util.LinkedList;
  */
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-	public static SimulationMode mode = SimulationMode.LAW_AVERAGE;
-	private static final int maxRepl = 10;
+	private static final int maxRepl = 100;
+	public static SimulationMode mode = SimulationMode.LAW;
 	
 	public static void main(String[] args) throws IOException{
 		final var results = new HashMap<Integer, Simulator.SimulatorData>();
@@ -34,13 +35,35 @@ public class Main{
 				ArrClEvent.setReplayData(replayData.getX());
 				AccService.setReplayData(replayData.getY());
 			}
-			ArrClEvent.setLaw(new ExponentialLaw(0.175));
-			AccService.setLaw(new BetaLaw(2.5, 6.4));
+			ArrClEvent.setLaw(new ExponentialDistribution(1 / 0.175));
+			AccService.setLaw(new BetaDistribution(2.5, 6.4));
 			final var simulator = new Simulator();
 			simulator.start();
 			results.put(i, simulator.getData());
 		}
-		LOGGER.info("Final data: {}", results);
+		LOGGER.info("Final data:\n{}", results.entrySet().stream().map(entry -> String.format("Replication %d: %s", entry.getKey() + 1, entry.getValue().toString())).collect(Collectors.joining("\n")));
+		
+		LOGGER.info("Final Data as CSV:\n{}", asCSV(results));
+	}
+	
+	private static String asCSV(HashMap<Integer, Simulator.SimulatorData> results){
+		final var sb = new StringBuilder();
+		sb.append("B;Q;N;AireQ;TempsMoy;TempsMax\n");
+		for(var result : results.values()){
+			sb.append(result.b);
+			sb.append(";");
+			sb.append(result.q.size());
+			sb.append(";");
+			sb.append(result.n);
+			sb.append(";");
+			sb.append(result.aireQ);
+			sb.append(";");
+			sb.append(result.tempsMoy);
+			sb.append(";");
+			sb.append(result.tempsMax);
+			sb.append("\n");
+		}
+		return sb.toString();
 	}
 	
 	private static Pair<LinkedList<Double>, LinkedList<Double>> loadReplayData(@SuppressWarnings("SameParameterValue") final String filename) throws IOException{
