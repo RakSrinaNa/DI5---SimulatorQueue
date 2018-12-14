@@ -10,9 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by Thomas Couchoud (MrCraftCod - zerderr@gmail.com) on 2018-11-30.
@@ -23,7 +25,8 @@ import java.util.stream.Collectors;
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	private static final int maxRepl = 100;
-	public static SimulationMode mode = SimulationMode.LAW;
+	public static SimulationMode mode = SimulationMode.AVERAGE;
+	private static int guichetCount = 1;
 	
 	public static void main(String[] args) throws IOException{
 		final var results = new HashMap<Integer, Simulator.SimulatorData>();
@@ -38,7 +41,7 @@ public class Main{
 			ArrClEvent.setLaw(new ExponentialDistribution(1 / 0.175));
 			AccService.setLaw(new BetaDistribution(2.5, 6.4));
 			final var simulator = new Simulator();
-			simulator.start();
+			simulator.start(guichetCount);
 			results.put(i, simulator.getData());
 		}
 		LOGGER.info("Final data:\n{}", results.entrySet().stream().map(entry -> String.format("Replication %d: %s", entry.getKey() + 1, entry.getValue().toString())).collect(Collectors.joining("\n")));
@@ -48,9 +51,9 @@ public class Main{
 	
 	private static String asCSV(HashMap<Integer, Simulator.SimulatorData> results){
 		final var sb = new StringBuilder();
-		sb.append("B;Q;N;AireQ;TempsMoy;TempsMax\n");
+		sb.append(String.format("%s;Q;N;AireQ;TempsMoy;TempsMax\n", IntStream.range(0, guichetCount).mapToObj(i -> "B" + (1 + i)).collect(Collectors.joining(";"))));
 		for(var result : results.values()){
-			sb.append(result.b);
+			sb.append(Arrays.stream(result.b).mapToObj(i -> "" + i).collect(Collectors.joining(";")));
 			sb.append(";");
 			sb.append(result.q.size());
 			sb.append(";");

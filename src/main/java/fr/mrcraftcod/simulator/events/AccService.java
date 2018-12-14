@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * Created by Thomas Couchoud (MrCraftCod - zerderr@gmail.com) on 2018-12-11.
@@ -47,12 +48,14 @@ public class AccService extends AbstractEvent{
 	
 	@Override
 	public void execute(Simulator.SimulatorData data){
-		data.b = 1;
-		final var client = data.q.poll();
-		if(Objects.nonNull(client)){
-			data.tempsMax = Math.max(data.tempsMax, getTime() - client.getTpsArr());
-			data.queue.add(new DepService(getTime() + getServiceTime()));
-		}
+		IntStream.range(0, data.guichetCount).filter(i -> data.b[i] == 0).findFirst().ifPresent(index -> {
+			data.b[index] = 1;
+			final var client = data.q.poll();
+			if(Objects.nonNull(client)){
+				data.tempsMax = Math.max(data.tempsMax, getTime() - client.getTpsArr());
+				data.queue.add(new DepService(getTime() + getServiceTime()));
+			}
+		});
 	}
 	
 	public static void setLaw(AbstractRealDistribution law){

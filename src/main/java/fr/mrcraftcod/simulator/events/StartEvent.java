@@ -11,9 +11,19 @@ import java.util.LinkedList;
  * @since 2018-11-30
  */
 public class StartEvent implements Event{
+	private final int guichetCount;
+	
+	public StartEvent(int guichetCount){
+		this.guichetCount = guichetCount;
+	}
+	
 	@Override
 	public void execute(Simulator.SimulatorData data){
-		data.b = 0;
+		data.guichetCount = guichetCount;
+		data.b = new int[guichetCount];
+		for(int i = 0; i < guichetCount; i++){
+			data.b[i] = 0;
+		}
 		data.q = new LinkedList<>();
 		data.n = 0;
 		data.aireQ = 0;

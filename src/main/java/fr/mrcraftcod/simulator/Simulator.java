@@ -21,7 +21,8 @@ public class Simulator{
 	private double time;
 	
 	public class SimulatorData{
-		public int b;
+		public int guichetCount;
+		public int[] b;
 		public LinkedList<Client> q;
 		public int n;
 		public double aireQ;
@@ -39,10 +40,10 @@ public class Simulator{
 		this.data = new SimulatorData();
 	}
 	
-	public void start(){
+	public void start(int guichetCount){
 		time = 0;
 		this.data.queue = new PriorityQueue<>(Comparator.comparingDouble(Event::getTime));
-		new StartEvent().execute(data);
+		new StartEvent(guichetCount).execute(data);
 		Event evt;
 		while((evt = data.queue.poll()) != null){
 			LOGGER.debug("Executing event at t={} => {}", evt.getTime(), evt);
