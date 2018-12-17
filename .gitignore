@@ -3,3 +3,4 @@ FTPFetcher.iml
 target
 settings.properties
 log
+*.csv
