@@ -6,4 +6,4 @@ package fr.mrcraftcod.simulator;
  * @author Thomas Couchoud
  * @since 2018-12-11
  */
-public enum SimulationMode{REPLAY, AVERAGE, LAW_AVERAGE, LAW}
+public enum SimulationMode{REPLAY, AVERAGE, LAW_AVERAGE, LAW, EMPIRICAL}

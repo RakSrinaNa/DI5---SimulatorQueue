@@ -7,7 +7,10 @@ import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -20,6 +23,9 @@ public class AccService extends AbstractEvent{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccService.class);
 	private static LinkedList<Double> replayData = null;
 	private static AbstractRealDistribution law = null;
+	private static double replayMin;
+	private static double replayMax;
+	private static List<Double> empirical;
 	
 	public AccService(double time){super(time);}
 	
@@ -37,8 +43,24 @@ public class AccService extends AbstractEvent{
 				return 1;
 			case LAW:
 				return (18.24 - 0.15) * law.sample() + 0.15;
+			case EMPIRICAL:
+				return genEmpirical();
 		}
 		LOGGER.error("Impossible enum value");
+		return 1;
+	}
+	
+	@SuppressWarnings("Duplicates")
+	private double genEmpirical(){
+		if(Objects.nonNull(replayData)){
+			var rnd = ThreadLocalRandom.current().nextDouble();
+			var index = rnd * (empirical.size() - 1);
+			var indexInt = (int) index;
+			var indexFloat = index - indexInt;
+			var x1 = empirical.get(indexInt);
+			var x2 = empirical.get(indexInt + 1);
+			return x1 + indexFloat * (x2 - x1);
+		}
 		return 1;
 	}
 	
@@ -60,5 +82,8 @@ public class AccService extends AbstractEvent{
 	
 	public static void setLaw(AbstractRealDistribution law){
 		AccService.law = law;
+		AccService.replayMin = replayData.stream().mapToDouble(d -> d).min().orElse(0);
+		AccService.replayMax = replayData.stream().mapToDouble(d -> d).max().orElse(1);
+		AccService.empirical = replayData.stream().sorted().collect(Collectors.toList());
 	}
 }

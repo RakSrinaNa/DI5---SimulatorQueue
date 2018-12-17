@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -25,22 +24,24 @@ import java.util.stream.IntStream;
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	private static final int maxRepl = 100;
-	public static SimulationMode mode = SimulationMode.AVERAGE;
+	public static SimulationMode mode = SimulationMode.EMPIRICAL;
 	private static int guichetCount = 1;
+	private static boolean genLogs = true;
 	
 	public static void main(String[] args) throws IOException{
 		final var results = new HashMap<Integer, Simulator.SimulatorData>();
 		for(int i = 0; i < maxRepl; i++){
-			LOGGER.info("Starting replication {}/{}", i, maxRepl);
-			if(mode == SimulationMode.REPLAY){
+			LOGGER.info("Starting replication {}/{}", i + 1, maxRepl);
+			if(mode == SimulationMode.REPLAY || mode == SimulationMode.EMPIRICAL){
 				LOGGER.info("Reading DataAppels files");
 				final var replayData = loadReplayData("DataAppels.txt");
 				ArrClEvent.setReplayData(replayData.getX());
 				AccService.setReplayData(replayData.getY());
+				LOGGER.info("Read file DataAppels");
 			}
 			ArrClEvent.setLaw(new ExponentialDistribution(1 / 0.175));
 			AccService.setLaw(new BetaDistribution(2.5, 6.4));
-			final var simulator = new Simulator();
+			final var simulator = new Simulator(genLogs ? new File(String.format("DataLog-%d.csv", i + 1)) : null);
 			simulator.start(guichetCount);
 			results.put(i, simulator.getData());
 		}
@@ -52,20 +53,7 @@ public class Main{
 	private static String asCSV(HashMap<Integer, Simulator.SimulatorData> results){
 		final var sb = new StringBuilder();
 		sb.append(String.format("%s;Q;N;AireQ;TempsMoy;TempsMax\n", IntStream.range(0, guichetCount).mapToObj(i -> "B" + (1 + i)).collect(Collectors.joining(";"))));
-		for(var result : results.values()){
-			sb.append(Arrays.stream(result.b).mapToObj(i -> "" + i).collect(Collectors.joining(";")));
-			sb.append(";");
-			sb.append(result.q.size());
-			sb.append(";");
-			sb.append(result.n);
-			sb.append(";");
-			sb.append(result.aireQ);
-			sb.append(";");
-			sb.append(result.tempsMoy);
-			sb.append(";");
-			sb.append(result.tempsMax);
-			sb.append("\n");
-		}
+		sb.append(results.values().stream().map(Simulator.SimulatorData::asCsv).collect(Collectors.joining("\n")));
 		return sb.toString();
 	}
 	
