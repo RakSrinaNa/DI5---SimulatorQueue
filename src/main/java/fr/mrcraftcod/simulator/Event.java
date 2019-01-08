@@ -7,7 +7,17 @@ package fr.mrcraftcod.simulator;
  * @since 2018-11-30
  */
 public interface Event{
+	/**
+	 * Execute the event.
+	 *
+	 * @param data The data of the simulation.
+	 */
 	void execute(Simulator.SimulatorData data);
 	
+	/**
+	 * Get the time of the event.
+	 *
+	 * @return The time of the event.
+	 */
 	double getTime();
 }

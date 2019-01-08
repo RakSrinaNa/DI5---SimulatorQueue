@@ -23,26 +23,40 @@ import java.util.stream.IntStream;
  */
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-	private static final int maxRepl = 100;
-	public static SimulationMode mode = SimulationMode.EMPIRICAL;
-	private static int guichetCount = 1;
-	private static boolean genLogs = true;
 	
+	public final static SimulationMode SIMULATION_MODE = SimulationMode.EMPIRICAL;
+	private static final int REPLICATION_COUNT = 100; //Number of replications
+	private final static int COUNTER_COUNT = 1; //Number of counter(s)
+	private final static boolean GEN_LOGS = true; //Generate CSV logs
+	
+	/**
+	 * Main method.
+	 *
+	 * @param args Not used.
+	 *
+	 * @throws IOException If an input file couldn't be read.
+	 */
 	public static void main(String[] args) throws IOException{
 		final var results = new HashMap<Integer, Simulator.SimulatorData>();
-		for(int i = 0; i < maxRepl; i++){
-			LOGGER.info("Starting replication {}/{}", i + 1, maxRepl);
-			if(mode == SimulationMode.REPLAY || mode == SimulationMode.EMPIRICAL){
+		for(int i = 0; i < REPLICATION_COUNT; i++){
+			LOGGER.info("Starting replication {}/{}", i + 1, REPLICATION_COUNT);
+			
+			//If we need to read the input file, read it
+			if(SIMULATION_MODE == SimulationMode.REPLAY || SIMULATION_MODE == SimulationMode.EMPIRICAL){
 				LOGGER.info("Reading DataAppels files");
 				final var replayData = loadReplayData("DataAppels.txt");
 				ArrClEvent.setReplayData(replayData.getX());
 				AccService.setReplayData(replayData.getY());
 				LOGGER.info("Read file DataAppels");
 			}
+			
+			//Set up laws
 			ArrClEvent.setLaw(new ExponentialDistribution(1 / 0.175));
 			AccService.setLaw(new BetaDistribution(2.5, 6.4));
-			final var simulator = new Simulator(genLogs ? new File(String.format("DataLog-%d.csv", i + 1)) : null);
-			simulator.start(guichetCount);
+			
+			//Run simulator
+			final var simulator = new Simulator(GEN_LOGS ? new File(String.format("DataLog-%d.csv", i + 1)) : null);
+			simulator.start(COUNTER_COUNT);
 			results.put(i, simulator.getData());
 		}
 		LOGGER.info("Final data:\n{}", results.entrySet().stream().map(entry -> String.format("Replication %d: %s", entry.getKey() + 1, entry.getValue().toString())).collect(Collectors.joining("\n")));
@@ -50,13 +64,15 @@ public class Main{
 		LOGGER.info("Final Data as CSV:\n{}", asCSV(results));
 	}
 	
-	private static String asCSV(HashMap<Integer, Simulator.SimulatorData> results){
-		final var sb = new StringBuilder();
-		sb.append(String.format("%s;Q;N;AireQ;TempsMoy;TempsMax\n", IntStream.range(0, guichetCount).mapToObj(i -> "B" + (1 + i)).collect(Collectors.joining(";"))));
-		sb.append(results.values().stream().map(Simulator.SimulatorData::asCsv).collect(Collectors.joining("\n")));
-		return sb.toString();
-	}
-	
+	/**
+	 * Load the replay data from a CSV file.
+	 *
+	 * @param filename The path of the file to open.
+	 *
+	 * @return The data read.
+	 *
+	 * @throws IOException If the file couldn't be read.
+	 */
 	private static Pair<LinkedList<Double>, LinkedList<Double>> loadReplayData(@SuppressWarnings("SameParameterValue") final String filename) throws IOException{
 		final var lines = Files.readAllLines(Paths.get(new File(filename).toURI()));
 		final var interTime = new LinkedList<Double>();
@@ -70,5 +86,16 @@ public class Main{
 			lastArrival = a;
 		}
 		return new Pair<>(interTime, serviceTime);
+	}
+	
+	/**
+	 * Exports the results as a CSV to be imported in a spreadsheet.
+	 *
+	 * @param results The results to export.
+	 *
+	 * @return A CSV String.
+	 */
+	private static String asCSV(HashMap<Integer, Simulator.SimulatorData> results){
+		return String.format("%s;Q;N;AireQ;TempsMoy;TempsMax\n", IntStream.range(0, COUNTER_COUNT).mapToObj(i -> "B" + (1 + i)).collect(Collectors.joining(";"))) + results.values().stream().map(Simulator.SimulatorData::asCsv).collect(Collectors.joining("\n"));
 	}
 }

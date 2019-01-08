@@ -11,6 +11,11 @@ import java.util.stream.IntStream;
  * @since 2018-12-11
  */
 public class DepService extends AbstractEvent{
+	/**
+	 * Constructor.
+	 *
+	 * @param time The time of the event.
+	 */
 	public DepService(double time){super(time);}
 	
 	@Override

@@ -13,6 +13,11 @@ import java.util.LinkedList;
 public class StartEvent implements Event{
 	private final int guichetCount;
 	
+	/**
+	 * Constructor.
+	 *
+	 * @param guichetCount The number of counters.
+	 */
 	public StartEvent(int guichetCount){
 		this.guichetCount = guichetCount;
 	}

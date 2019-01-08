@@ -9,6 +9,11 @@ package fr.mrcraftcod.simulator;
 public abstract class AbstractEvent implements Event{
 	private final double time;
 	
+	/**
+	 * Constructor.
+	 *
+	 * @param time The time of the event.
+	 */
 	protected AbstractEvent(double time){
 		this.time = time;
 	}

@@ -10,6 +10,11 @@ import fr.mrcraftcod.simulator.Simulator;
  * @since 2018-11-30
  */
 public class EndEvent extends AbstractEvent{
+	/**
+	 * Constructor.
+	 *
+	 * @param time The time of the event.
+	 */
 	public EndEvent(double time){super(time);}
 	
 	@Override

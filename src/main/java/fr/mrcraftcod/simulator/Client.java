@@ -11,10 +11,20 @@ import java.util.StringJoiner;
 public class Client{
 	private final double tpsArr;
 	
+	/**
+	 * Constructor.
+	 *
+	 * @param tpsArr Its arrival time.
+	 */
 	public Client(double tpsArr){
 		this.tpsArr = tpsArr;
 	}
 	
+	/**
+	 * Get the arrival time of the client.
+	 *
+	 * @return The arrival time.
+	 */
 	public double getTpsArr(){
 		return this.tpsArr;
 	}

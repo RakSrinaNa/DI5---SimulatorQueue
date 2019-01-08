@@ -14,6 +14,12 @@ import java.util.Arrays;
 public class AccFile extends AbstractEvent{
 	private final Client client;
 	
+	/**
+	 * Constructor.
+	 *
+	 * @param time   The time of the event.
+	 * @param client The client that is arriving.
+	 */
 	public AccFile(double time, Client client){
 		super(time);
 		this.client = client;
@@ -22,8 +28,7 @@ public class AccFile extends AbstractEvent{
 	@Override
 	public void execute(Simulator.SimulatorData data){
 		data.q.add(client);
-		if(Arrays.stream(data.b).anyMatch(v -> v == 0))
-		{
+		if(Arrays.stream(data.b).anyMatch(v -> v == 0)){
 			data.queue.add(new AccService(getTime()));
 		}
 	}

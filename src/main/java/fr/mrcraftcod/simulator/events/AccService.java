@@ -23,17 +23,25 @@ public class AccService extends AbstractEvent{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccService.class);
 	private static LinkedList<Double> replayData = null;
 	private static AbstractRealDistribution law = null;
-	private static double replayMin;
-	private static double replayMax;
 	private static List<Double> empirical;
 	
+	/**
+	 * Constructor.
+	 *
+	 * @param time The time of the event.
+	 */
 	public AccService(double time){super(time);}
 	
+	/**
+	 * Get the service time based on the current mode.
+	 *
+	 * @return The service time.
+	 */
 	private double getServiceTime(){
-		switch(Main.mode){
+		switch(Main.SIMULATION_MODE){
 			case AVERAGE:
 			case LAW_AVERAGE:
-				return 5.156735016;
+				return 5.156735016; //Average computed from the replay data.
 			case REPLAY:
 				final var value = AccService.replayData.poll();
 				if(Objects.nonNull(value)){
@@ -42,7 +50,7 @@ public class AccService extends AbstractEvent{
 				LOGGER.error("No more data in replay");
 				return 1;
 			case LAW:
-				return (18.24 - 0.15) * law.sample() + 0.15;
+				return (18.24 - 0.15) * law.sample() + 0.15; //Normalized (max - min) * rnd + min
 			case EMPIRICAL:
 				return genEmpirical();
 		}
@@ -50,10 +58,17 @@ public class AccService extends AbstractEvent{
 		return 1;
 	}
 	
+	/**
+	 * Get the service time with an empirical model.
+	 *
+	 * @return The service time.
+	 */
 	@SuppressWarnings("Duplicates")
 	private double genEmpirical(){
 		if(Objects.nonNull(replayData)){
-			var rnd = ThreadLocalRandom.current().nextDouble();
+			var rnd = ThreadLocalRandom.current().nextDouble(); //Uniform law in [0;1[
+			
+			//Map it into the empirical data
 			var index = rnd * (empirical.size() - 1);
 			var indexInt = (int) index;
 			var indexFloat = index - indexInt;
@@ -64,8 +79,14 @@ public class AccService extends AbstractEvent{
 		return 1;
 	}
 	
-	public static void setReplayData(LinkedList<Double> replayData){
-		AccService.replayData = replayData;
+	/**
+	 * Set the law to use.
+	 *
+	 * @param law The law to set.
+	 */
+	public static void setLaw(AbstractRealDistribution law){
+		AccService.law = law;
+		AccService.empirical = replayData.stream().sorted().collect(Collectors.toList());
 	}
 	
 	@Override
@@ -80,10 +101,12 @@ public class AccService extends AbstractEvent{
 		});
 	}
 	
-	public static void setLaw(AbstractRealDistribution law){
-		AccService.law = law;
-		AccService.replayMin = replayData.stream().mapToDouble(d -> d).min().orElse(0);
-		AccService.replayMax = replayData.stream().mapToDouble(d -> d).max().orElse(1);
-		AccService.empirical = replayData.stream().sorted().collect(Collectors.toList());
+	/**
+	 * Set the replay data.
+	 *
+	 * @param replayData The replay data to set.
+	 */
+	public static void setReplayData(LinkedList<Double> replayData){
+		AccService.replayData = replayData;
 	}
 }
