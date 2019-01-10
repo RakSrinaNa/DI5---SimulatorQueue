@@ -38,6 +38,7 @@ public class Simulator{
 		public double tempsMoy;
 		public double tempsMax;
 		public PriorityQueue<Event> queue;
+		public List<Double> waitTimeClient;
 		
 		@Override
 		public String toString(){

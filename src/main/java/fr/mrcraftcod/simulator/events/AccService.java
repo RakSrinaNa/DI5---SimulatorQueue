@@ -86,7 +86,8 @@ public class AccService extends AbstractEvent{
 	 */
 	public static void setLaw(AbstractRealDistribution law){
 		AccService.law = law;
-		AccService.empirical = replayData.stream().sorted().collect(Collectors.toList());
+		if(replayData != null)
+			AccService.empirical = replayData.stream().sorted().collect(Collectors.toList());
 	}
 	
 	@Override
@@ -97,6 +98,7 @@ public class AccService extends AbstractEvent{
 			if(Objects.nonNull(client)){
 				data.tempsMax = Math.max(data.tempsMax, getTime() - client.getTpsArr());
 				data.queue.add(new DepService(getTime() + getServiceTime()));
+				data.waitTimeClient.add(getTime() - client.getTpsArr());
 			}
 		});
 	}

@@ -36,6 +36,7 @@ public class StartEvent implements Event{
 		data.tempsMax = 0;
 		data.queue.add(new ArrClEvent(getTime() + ArrClEvent.getInterTime()));
 		data.queue.add(new EndEvent(7200));
+		data.waitTimeClient = new LinkedList<>();
 	}
 	
 	@Override

@@ -24,8 +24,8 @@ import java.util.stream.IntStream;
 public class Main{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	
-	public final static SimulationMode SIMULATION_MODE = SimulationMode.EMPIRICAL;
-	private static final int REPLICATION_COUNT = 100; //Number of replications
+	public final static SimulationMode SIMULATION_MODE = SimulationMode.LAW;
+	private static final int REPLICATION_COUNT = 10; //Number of replications
 	private final static int COUNTER_COUNT = 1; //Number of counter(s)
 	private final static boolean GEN_LOGS = true; //Generate CSV logs
 	
@@ -62,6 +62,7 @@ public class Main{
 		LOGGER.info("Final data:\n{}", results.entrySet().stream().map(entry -> String.format("Replication %d: %s", entry.getKey() + 1, entry.getValue().toString())).collect(Collectors.joining("\n")));
 		
 		LOGGER.info("Final Data as CSV:\n{}", asCSV(results));
+		// LOGGER.info("Final Data TEMP as CSV:\n{}", results.values().stream().map(v -> v.waitTimeClient.stream().map(d -> "" + d).collect(Collectors.joining(";"))).collect(Collectors.joining("\n")));
 	}
 	
 	/**
